@@ -17,7 +17,11 @@ on:
 jobs:
   call-release-workflow:
     if: ${{ inputs.branch || github.event_name == 'workflow_run' }}
-    uses: CristiCanizales/bundle-publish-scripts/.github/workflows/releaseWithCoreBundle.yml@main
-    secrets: inherit
-    with:
-      branch: ${{ inputs.branch || 'main'}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - uses: CristiCanizales/bundle-publish-scripts/.github/workflows/releaseWithCoreBundle.yml@main
+        with:
+          branch: ${{ inputs.branch || 'main'}}
