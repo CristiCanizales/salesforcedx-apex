@@ -14,9 +14,24 @@ on:
         default: 'main'
 
 jobs:
+  get-package-info:
+    runs-on: ubuntu-latest
+    outputs:
+      package_version: ${{ steps.getVersion.outputs.packageVersion }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Extract package version
+        id: getVersion
+        run: |
+          echo "packageVersion=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
   call-release-workflow:
     if: ${{ inputs.branch || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')}}
+    needs: ['get-package-info']
     uses: forcedotcom/bundle-publish-scripts/.github/workflows/releaseWithCoreBundle.yml@main
     secrets: inherit
     with:
       branch: ${{ inputs.branch || 'main'}}
+      packageName: '@salesforce/apex-node-bundle'
+      package-version: ${{ steps.get-package-info.outputs.packageVersion }}
